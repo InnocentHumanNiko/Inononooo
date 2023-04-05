@@ -3,6 +3,8 @@ from discord.ext import commands
 import datetime
 import requests
 import random as rd
+import sqlite3
+
 
 intents = discord.Intents.all()
 intents.members = True
@@ -10,29 +12,16 @@ intents.typing = True
 intents.presences = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+conn = sqlite3.connect('user_scores.db')
+c = conn.cursor()
+
+c.execute('''CREATE TABLE IF NOT EXISTS scores
+             (user_id INTEGER PRIMARY KEY, score INTEGER)''')
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-
-    if message.content.startswith('!'):
-        embed = discord.Embed(
-        title = (f'**{message.author.name} used a command!**'),
-        description = (f'{message.content}\n\n'
-                       f'#{message.channel}'
-                       ),
-        color=0x9542f5,
-        timestamp=datetime.datetime.utcnow()
-        )
-        log = discord.utils.get(message.guild.channels, name="log")
-        await log.send(embed=embed)
-        await bot.process_commands(message)
-        return
 
 @bot.command()
 async def commands(ctx):
@@ -40,8 +29,8 @@ async def commands(ctx):
         title="**Commands list**",
         description="**!purge** - Use purge command to delete a large amount of message.\n"
         "**!ping** - Ping, Pong!\n"
-        "**!cat** - Gives a random cat images. Meow :heart:"
-        "**!rps** - Play Rock, Paper, Scissor with the bot."
+        "**!cat** - Gives a random cat images. Meow :heart:\n"
+        "**!rps** - Play Rock, Paper, Scissor with the bot.\n"
         "**!coinflip** - Heads or Tails. :thinking:"
     )
     await ctx.send(embed=embed)
@@ -147,6 +136,48 @@ async def coinflip(ctx):
     )
 
     await ctx.send(embed=embed)
+
+@bot.command()
+async def givexp(ctx, user: discord.Member, score: int):
+    c.execute('''INSERT INTO scores VALUES (?, ?)
+                 ON CONFLICT(user_id) DO UPDATE SET score = score + ?''',
+                 (user.id, score, score))
+    conn.commit()
+    await ctx.send(f"Added {score} points to {user.name}'s score!")
+
+@bot.command()
+async def showxp(ctx, user: discord.Member = None):
+    if user is None:
+        user = ctx.author
+    c.execute("SELECT score FROM scores WHERE user_id = ?", (user.id,))
+    row = c.fetchone()
+    if row is None:
+        await ctx.send(f"{user.name} doesn't have a score yet.")
+    else:
+        score = row[0]
+        await ctx.send(f"{user.name}'s score is {score}.")
+
+@bot.event
+async def on_bot_disconnect():
+    conn.close()
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    l = []
+    for letter in message.content:
+        l.append(letter)
+    
+    user = message.author.id
+    score = len(l)
+
+    c.execute('''INSERT INTO scores VALUES (?, ?)
+                 ON CONFLICT(user_id) DO UPDATE SET score = score + ?''',
+                 (user, score, score))
+    conn.commit()
+
+    await bot.process_commands(message))
 
 
 bot.run("")
