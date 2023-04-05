@@ -149,4 +149,4 @@ async def coinflip(ctx):
     await ctx.send(embed=embed)
 
 
-bot.run("MTA5Mjc5MzY5MTA1MzI0ODUzMg.G5mWri.uc_G27be2CZIE9rjCqfu7-INSUHvFJv8v2eqqE")
+bot.run("")
