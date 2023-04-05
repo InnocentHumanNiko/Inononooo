@@ -41,6 +41,8 @@ async def commands(ctx):
         description="**!purge** - Use purge command to delete a large amount of message.\n"
         "**!ping** - Ping, Pong!\n"
         "**!cat** - Gives a random cat images. Meow :heart:"
+        "**!rps** - Play Rock, Paper, Scissor with the bot."
+        "**!coinflip** - Heads or Tails. :thinking:"
     )
     await ctx.send(embed=embed)
 
@@ -80,73 +82,71 @@ async def purge(ctx, amount: int = 0):
 
 @bot.command()
 async def rps(ctx, move: str = 'nil'):
-    draw = discord.Embed(
-                title="**Draw**",
-                description=f"Looks like we ended in a draw.\n"
-                f"I picked **{RNG}** as same as you!"
-    )
-    
-
-    win = discord.Embed(
-                title="**You win!**",
-                description=f"Wow! You picked **{move}** but I picked scissor!"
-    )
-
-
-    lose = discord.Embed(
-        title="**You lose!**",
-        description=f"It looks like you picked **{move}**.\n"
-        f"But I picked **{RNG}**! Better luck next time!"
-    )
-
-
-    embedfail = discord.Embed(
+    if move == 'nil':
+        embedfail = discord.Embed(
             title="**Command: rps**",
             description="**Usage: ** !rps [Rock|Paper|Scissor]\n"
-            "**Description: ** use **rps** to play Rock, Paper, Scissor."
-    )
-
-
-    if move == 'nil':
+                        "**Description: ** use **rps** to play Rock, Paper, Scissor."
+        )
         await ctx.send(embed=embedfail)
-    
+        return
+
+    moves = {"rock": "Rock", "paper": "Paper", "scissor": "Scissor", "r": "Rock", "p": "Paper", "s": "Scissor"}
+    if move.lower() not in moves:
+        embedfail = discord.Embed(
+            title="**Command: rps**",
+            description="**Usage: ** !rps [Rock|Paper|Scissor]\n"
+                        "**Description: ** use **rps** to play Rock, Paper, Scissor."
+        )
+        await ctx.send(embed=embedfail)
+        return
+    else:
+        move = moves[move.lower()]
 
     RNG = rd.randint(1, 3)
-    if move == "Rock" or move == "rock" or move == "R" or move == "r":
-        move = "Rock"
-        if RNG == 1:
-            RNG = "Rock"
-            await ctx.send(embed=draw)
-        elif RNG == 3:
-            RNG = "Scissor"
-            await ctx.send(embed=win)
-        elif RNG == 2:
-            RNG = "Paper"
-            await ctx.send(embed=lose)
-    elif move == "Paper" or move == "paper" or move == "P" or move == "p":
-        move = "Paper"
-        if RNG == 2:
-            RNG = "Paper"
-            await ctx.send(embed=draw)
-        elif RNG == 1:
-            RNG = "Rock"
-            await ctx.send(embed=win)
-        elif RNG == 3:
-            RNG = "Scissor"
-            await ctx.send(embed=lose)
-    elif move == "Scissor" or move == "scissor" or move == "S" or move == "s":
-        move = "Scissor"
-        if RNG == 3:
-            RNG = "Scissor"
-            await ctx.send(embed=draw)
-        elif RNG == 2:
-            RNG = "Paper"
-            await ctx.send(embed=win)
-        elif RNG == 1:
-            RNG = "Rock"
-            await ctx.send(embed=lose)
+    if RNG == 1:
+        pick = "Rock"
+    elif RNG == 2:
+        pick = "Paper"
+    elif RNG == 3:
+        pick = "Scissor"
+
+    if move == pick:
+        draw = discord.Embed(
+            title="**Draw**",
+            description=f"Looks like we ended in a draw.\n"
+                        f"I picked **{pick}** just like you!"
+        )
+        await ctx.send(embed=draw)
+    elif (move == "Rock" and pick == "Scissor") or (move == "Paper" and pick == "Rock") or (move == "Scissor" and pick == "Paper"):
+        win = discord.Embed(
+            title="**You win!**",
+            description=f"Wow! You picked **{move}** and I picked **{pick}**!\n"
+                        f"Congratulations, you win!"
+        )
+        await ctx.send(embed=win)
     else:
-        ctx.send(embed=embedfail)
+        lose = discord.Embed(
+            title="**You lose!**",
+            description=f"It looks like you picked **{move}** and I picked **{pick}**!\n"
+                        f"Sorry, better luck next time!"
+        )
+        await ctx.send(embed=lose)
+
+@bot.command()
+async def coinflip(ctx):
+    if rd.randint(1,2) == 1:
+        ht = "Heads"
+    elif rd.randint(1,2) == 2:
+        ht = "Tails"
+    else:
+        return
+
+    embed = discord.Embed(
+        title=f"{ctx.author.name} flipped a coin and got **{ht}**"
+    )
+
+    await ctx.send(embed=embed)
 
 
-bot.run("TOKEN")
+bot.run("MTA5Mjc5MzY5MTA1MzI0ODUzMg.G5mWri.uc_G27be2CZIE9rjCqfu7-INSUHvFJv8v2eqqE")
