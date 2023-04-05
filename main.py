@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import datetime
 import requests
+import random as rd
 
 intents = discord.Intents.all()
 intents.members = True
@@ -76,5 +77,76 @@ async def purge(ctx, amount: int = 0):
     )
 
     await log.send(embed=embeddelete)
+
+@bot.command()
+async def rps(ctx, move: str = 'nil'):
+    draw = discord.Embed(
+                title="**Draw**",
+                description=f"Looks like we ended in a draw.\n"
+                f"I picked **{RNG}** as same as you!"
+    )
+    
+
+    win = discord.Embed(
+                title="**You win!**",
+                description=f"Wow! You picked **{move}** but I picked scissor!"
+    )
+
+
+    lose = discord.Embed(
+        title="**You lose!**",
+        description=f"It looks like you picked **{move}**.\n"
+        f"But I picked **{RNG}**! Better luck next time!"
+    )
+
+
+    embedfail = discord.Embed(
+            title="**Command: rps**",
+            description="**Usage: ** !rps [Rock|Paper|Scissor]\n"
+            "**Description: ** use **rps** to play Rock, Paper, Scissor."
+    )
+
+
+    if move == 'nil':
+        await ctx.send(embed=embedfail)
+    
+
+    RNG = rd.randint(1, 3)
+    if move == "Rock" or move == "rock" or move == "R" or move == "r":
+        move = "Rock"
+        if RNG == 1:
+            RNG = "Rock"
+            await ctx.send(embed=draw)
+        elif RNG == 3:
+            RNG = "Scissor"
+            await ctx.send(embed=win)
+        elif RNG == 2:
+            RNG = "Paper"
+            await ctx.send(embed=lose)
+    elif move == "Paper" or move == "paper" or move == "P" or move == "p":
+        move = "Paper"
+        if RNG == 2:
+            RNG = "Paper"
+            await ctx.send(embed=draw)
+        elif RNG == 1:
+            RNG = "Rock"
+            await ctx.send(embed=win)
+        elif RNG == 3:
+            RNG = "Scissor"
+            await ctx.send(embed=lose)
+    elif move == "Scissor" or move == "scissor" or move == "S" or move == "s":
+        move = "Scissor"
+        if RNG == 3:
+            RNG = "Scissor"
+            await ctx.send(embed=draw)
+        elif RNG == 2:
+            RNG = "Paper"
+            await ctx.send(embed=win)
+        elif RNG == 1:
+            RNG = "Rock"
+            await ctx.send(embed=lose)
+    else:
+        ctx.send(embed=embedfail)
+
 
 bot.run("MTA5Mjc5MzY5MTA1MzI0ODUzMg.G5mWri.uc_G27be2CZIE9rjCqfu7-INSUHvFJv8v2eqqE")
